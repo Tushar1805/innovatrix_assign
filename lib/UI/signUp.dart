@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:innovatrix_assign/UI/login.dart';
 
 class SignUp extends StatefulWidget {
+  SignUp({ Key? key}) : super(key: key);
+
   @override
   State<SignUp> createState() => _SignUpState();
 }
@@ -141,7 +144,6 @@ class _SignUpState extends State<SignUp> {
                         onPressed: () {
                           if (formKey.currentState!.validate()) {
                             //Login method will be here
-
                           }
                         },
                         child: const Text(
@@ -157,6 +159,12 @@ class _SignUpState extends State<SignUp> {
                       TextButton(
                           onPressed: () {
                             //Navigate to sign up
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginScreen(),
+                              ),
+                            );
                           },
                           child: const Text("Login"))
                     ],

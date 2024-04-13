@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:innovatrix_assign/UI/signUp.dart';
 // import 'package:sqlite_flutter_crud/Authtentication/signup.dart';
 // import 'package:sqlite_flutter_crud/JsonModels/users.dart';
 // import 'package:sqlite_flutter_crud/SQLite/sqlite.dart';
 // import 'package:sqlite_flutter_crud/Views/notes.dart';
 
 class LoginScreen extends StatefulWidget {
+  LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -60,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   //Before we show the image, after we copied the image we need to define the location in pubspec.yaml
                   Image.asset(
-                    "lib/assets/login.png",
+                    "assets/login.png",
                     width: 210,
                   ),
                   const SizedBox(height: 15),
@@ -154,12 +156,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextButton(
                           onPressed: () {
                             //Navigate to sign up
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const SignUp(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignUp(),
+                              ),
+                            );
                           },
                           child: const Text("SIGN UP"))
                     ],
