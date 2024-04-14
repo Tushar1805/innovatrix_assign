@@ -1,53 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:innovatrix_assign/UI/homeScreen.dart';
 import 'package:innovatrix_assign/UI/signUp.dart';
-// import 'package:sqlite_flutter_crud/Authtentication/signup.dart';
-// import 'package:sqlite_flutter_crud/JsonModels/users.dart';
-// import 'package:sqlite_flutter_crud/SQLite/sqlite.dart';
-// import 'package:sqlite_flutter_crud/Views/notes.dart';
+import 'package:innovatrix_assign/models/user_database.dart';
 
-class LoginScreen extends StatefulWidget {
+// ignore: must_be_immutable
+class LoginScreen extends ConsumerWidget {
   LoginScreen({Key? key}) : super(key: key);
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  //We need two text editing controller
 
   //TextEditing controller to control the text when we enter into it
   final username = TextEditingController();
   final password = TextEditingController();
 
-  //A bool variable for show and hide password
-  bool isVisible = false;
-
-  //Here is our bool variable
-  bool isLoginTrue = false;
-
-  // final db = DatabaseHelper();
-
-  //Now we should call this function in login button
-  // login() async {
-  //   var response = await db
-  //       .login(Users(usrName: username.text, usrPassword: password.text));
-  //   if (response == true) {
-  //     //If login is correct, then goto notes
-  //     if (!mounted) return;
-  //     Navigator.pushReplacement(
-  //         context, MaterialPageRoute(builder: (context) => const Notes()));
-  //   } else {
-  //     //If not, true the bool value to show error message
-  //     setState(() {
-  //       isLoginTrue = true;
-  //     });
-  //   }
-  // }
-
   //We have to create global key for our form
   final formKey = GlobalKey<FormState>();
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -59,8 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 children: [
                   //Username field
-
-                  //Before we show the image, after we copied the image we need to define the location in pubspec.yaml
                   Image.asset(
                     "assets/login.png",
                     width: 210,
@@ -105,22 +71,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                         return null;
                       },
-                      obscureText: !isVisible,
+                      obscureText: !ref.watch(userProvider).isVisible,
                       decoration: InputDecoration(
-                          icon: const Icon(Icons.lock),
-                          border: InputBorder.none,
-                          hintText: "Password",
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                //In here we will create a click to show and hide the password a toggle button
-                                setState(() {
-                                  //toggle button
-                                  isVisible = !isVisible;
-                                });
-                              },
-                              icon: Icon(isVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off))),
+                        icon: const Icon(Icons.lock),
+                        border: InputBorder.none,
+                        hintText: "Password",
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            //In here we will create a click to show and hide the password a toggle button
+                            ref.read(userProvider).changeVisibility();
+                          },
+                          icon: Icon(
+                            ref.watch(userProvider).isVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
 
@@ -133,13 +100,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(8),
                         color: Colors.deepPurple),
                     child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            //Login method will be here
-                            // login();
-
-                            //Now we have a response from our sqlite method
-                            //We are going to create a user
+                            if (await ref
+                                .watch(userProvider)
+                                .login(username.text, password.text)) {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => HomeScreen(),
+                                ),
+                              );
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Colors.red,
+                                content: Text(ref.read(userProvider).errMsg),
+                              ),
+                            );
                           }
                         },
                         child: const Text(
@@ -168,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
 
                   // We will disable this message in default, when user and pass is incorrect we will trigger this message to user
-                  isLoginTrue
+                  ref.watch(userProvider).isLoginTrue
                       ? const Text(
                           "Username or password is incorrect",
                           style: TextStyle(color: Colors.red),

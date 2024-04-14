@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:innovatrix_assign/UI/login.dart';
+import 'package:innovatrix_assign/models/user_database.dart';
 
-class SignUp extends StatefulWidget {
-  SignUp({ Key? key}) : super(key: key);
-
-  @override
-  State<SignUp> createState() => _SignUpState();
-}
-
-class _SignUpState extends State<SignUp> {
+// ignore: must_be_immutable
+class SignUp extends ConsumerWidget {
+  final name = TextEditingController();
   final username = TextEditingController();
   final password = TextEditingController();
   final confirmPassword = TextEditingController();
+  final phone = TextEditingController();
 
   final formKey = GlobalKey<FormState>();
 
-  bool isVisible = false;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       //SingleChildScrollView to have an scrol in the screen
       body: Center(
@@ -37,6 +33,31 @@ class _SignUpState extends State<SignUp> {
                           TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
                     ),
                   ),
+
+                  // name field
+                  Container(
+                    margin: EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.deepPurple.withOpacity(.2)),
+                    child: TextFormField(
+                      controller: name,
+                      keyboardType: TextInputType.name,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Full name is required";
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.person),
+                        border: InputBorder.none,
+                        hintText: "Full Name",
+                      ),
+                    ),
+                  ),
                   Container(
                     margin: EdgeInsets.all(8),
                     padding:
@@ -46,6 +67,7 @@ class _SignUpState extends State<SignUp> {
                         color: Colors.deepPurple.withOpacity(.2)),
                     child: TextFormField(
                       controller: username,
+                      keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return "username is required";
@@ -55,7 +77,32 @@ class _SignUpState extends State<SignUp> {
                       decoration: const InputDecoration(
                         icon: Icon(Icons.person),
                         border: InputBorder.none,
-                        hintText: "Username",
+                        hintText: "Username (Email)",
+                      ),
+                    ),
+                  ),
+
+                  // Phone Number
+                  Container(
+                    margin: EdgeInsets.all(8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Colors.deepPurple.withOpacity(.2)),
+                    child: TextFormField(
+                      controller: phone,
+                      keyboardType: TextInputType.phone,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Phone Number is required";
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        icon: Icon(Icons.person),
+                        border: InputBorder.none,
+                        hintText: "Phone Number",
                       ),
                     ),
                   ),
@@ -76,22 +123,23 @@ class _SignUpState extends State<SignUp> {
                         }
                         return null;
                       },
-                      obscureText: !isVisible,
+                      obscureText: !ref.watch(userProvider).isVisible,
                       decoration: InputDecoration(
-                          icon: const Icon(Icons.lock),
-                          border: InputBorder.none,
-                          hintText: "Password",
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                //In here we will create a click to show and hide the password a toggle button
-                                setState(() {
-                                  //toggle button
-                                  isVisible = !isVisible;
-                                });
-                              },
-                              icon: Icon(isVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off))),
+                        icon: const Icon(Icons.lock),
+                        border: InputBorder.none,
+                        hintText: "Password",
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            //In here we will create a click to show and hide the password a toggle button
+                            ref.read(userProvider).changeVisibility();
+                          },
+                          icon: Icon(
+                            ref.watch(userProvider).isVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   //Confirm Password field
@@ -113,7 +161,7 @@ class _SignUpState extends State<SignUp> {
                         }
                         return null;
                       },
-                      obscureText: !isVisible,
+                      obscureText: !ref.watch(userProvider).isConfirmVisible,
                       decoration: InputDecoration(
                           icon: const Icon(Icons.lock),
                           border: InputBorder.none,
@@ -121,14 +169,14 @@ class _SignUpState extends State<SignUp> {
                           suffixIcon: IconButton(
                               onPressed: () {
                                 //In here we will create a click to show and hide the password a toggle button
-                                setState(() {
-                                  //toggle button
-                                  isVisible = !isVisible;
-                                });
+                                ref
+                                    .watch(userProvider)
+                                    .changeConfirmVisibility();
                               },
-                              icon: Icon(isVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off))),
+                              icon: Icon(
+                                  ref.watch(userProvider).isConfirmVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off))),
                     ),
                   ),
 
@@ -141,10 +189,27 @@ class _SignUpState extends State<SignUp> {
                         borderRadius: BorderRadius.circular(8),
                         color: Colors.deepPurple),
                     child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (formKey.currentState!.validate()) {
                             //Login method will be here
+                            await ref.read(userProvider).signUp(
+                                  name: "name",
+                                  email: username.text,
+                                  password: password.text,
+                                  phone: phone.text,
+                                );
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(ref.watch(userProvider).regMsg),
+                              ),
+                            );
                           }
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           "SIGN UP",

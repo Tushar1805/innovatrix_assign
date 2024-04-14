@@ -1,11 +1,35 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:innovatrix_assign/models/users.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:bcrypt/bcrypt.dart';
 
-class UserDatabase {
+final userProvider =
+    ChangeNotifierProvider<UserDatabase>((ref) => UserDatabase());
+
+class UserDatabase extends ChangeNotifier {
   static late Isar isar;
-  // Initialize
 
+  //A bool variable for show and hide password
+  bool isVisible = false;
+  void changeVisibility() {
+    isVisible = !isVisible;
+    notifyListeners();
+  }
+
+  bool isConfirmVisible = false;
+  void changeConfirmVisibility() {
+    isConfirmVisible = !isConfirmVisible;
+    notifyListeners();
+  }
+
+  //Here is our bool variable
+  bool isLoginTrue = false;
+  String regMsg = "";
+  String errMsg = "";
+
+  // Initialize
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
     isar = await Isar.open(
@@ -16,27 +40,71 @@ class UserDatabase {
 
   // List of users
   List<Users> listOfUsers = [];
+  Users? currentUser;
 
   // CREATE
-  Future<void> addUser(
+  Future<void> signUp(
       {required String name,
       required String email,
+      required String password,
       required String phone}) async {
-    Users? newUser;
-    newUser!.name = name;
-    newUser.email = email;
-    newUser.phone = phone;
+    final existingUsers =
+        await isar.users.where().emailEqualTo(email).findAll();
 
-    await isar.writeTxn(() => isar.users.put(newUser));
-    await fetchUser();
+    if (existingUsers.isEmpty) {
+      final hashedPassword = hashPassword(password);
+      final newUser = Users()
+        ..name = name
+        ..password = hashedPassword
+        ..email = email
+        ..phone = phone;
+
+      await isar.writeTxn(() => isar.users.put(newUser));
+      regMsg = "User Registered Successfully";
+      notifyListeners();
+      await fetchUser();
+    } else {
+      regMsg = "Username already exists";
+      throw Exception(regMsg);
+    }
+    notifyListeners();
+  }
+
+  // Login
+  Future<bool> login(String username, String password) async {
+    final data = await isar.users.where().emailEqualTo(username).findFirst();
+    if (data.toString() != "null") {
+      isLoginTrue = verifyPassword(password, data!.password);
+      if (isLoginTrue) {
+        currentUser = data;
+      }
+      notifyListeners();
+      return isLoginTrue;
+    } else {
+      errMsg = "No user found with the provided email";
+      notifyListeners();
+      throw Exception(errMsg);
+    }
+  }
+
+  bool verifyPassword(String password, String hashedPassword) {
+    return comparePassword(password, hashedPassword);
+  }
+
+  static String hashPassword(String password) {
+    return BCrypt.hashpw(password, BCrypt.gensalt());
+  }
+
+  static bool comparePassword(String password, String hashedPassword) {
+    return BCrypt.checkpw(password, hashedPassword);
   }
 
   // READ
-
   Future<void> fetchUser() async {
     List<Users> fetchedUsers = await isar.users.where().findAll();
     listOfUsers.clear();
     listOfUsers.addAll(fetchedUsers);
+    notifyListeners();
   }
 
   // UPDATE
@@ -51,13 +119,14 @@ class UserDatabase {
 
       await isar.writeTxn(() => isar.users.put(exitingUser));
       await fetchUser();
+      notifyListeners();
     }
   }
 
   // DELETE
-
   Future<void> deleteUser({required Id id}) async {
     await isar.writeTxn(() => isar.users.delete(id));
     await fetchUser();
+    notifyListeners();
   }
 }
