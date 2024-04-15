@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:innovatrix_assign/UI/drawer.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -17,10 +18,7 @@ class HomeScreen extends StatelessWidget {
     return GraphQLProvider(
       client: client,
       child: Scaffold(
-        drawer: Container(
-          color: Colors.grey.shade100,
-          child: Text("Logout"),
-        ),
+        drawer: CustomDrawer(),
         appBar: AppBar(
           title: Text("GraphQL Data"),
         ),

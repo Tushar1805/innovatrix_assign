@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:innovatrix_assign/UI/homeScreen.dart';
+import 'package:innovatrix_assign/UI/home_screen.dart';
 import 'package:innovatrix_assign/UI/login.dart';
-import 'package:innovatrix_assign/models/authService.dart';
+import 'package:innovatrix_assign/models/auth_service.dart';
 import 'package:innovatrix_assign/models/user_database.dart';
 
 void main() async {
   // Initialize users Isar database
   WidgetsFlutterBinding.ensureInitialized();
   await UserDatabase.initialize();
-  final isLoggedIn = await AuthService.isLoggedIn();
+  final isLoggedIn = await AuthService().isLoggedIn();
   runApp(
     ProviderScope(
       child: MyApp(isLoggedIn: isLoggedIn),

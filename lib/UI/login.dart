@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:innovatrix_assign/UI/homeScreen.dart';
+import 'package:innovatrix_assign/UI/home_screen.dart';
 import 'package:innovatrix_assign/UI/signUp.dart';
 import 'package:innovatrix_assign/models/user_database.dart';
 
@@ -148,8 +148,8 @@ class LoginScreen extends ConsumerWidget {
 
                   // We will disable this message in default, when user and pass is incorrect we will trigger this message to user
                   ref.watch(userProvider).isLoginTrue
-                      ? const Text(
-                          "Username or password is incorrect",
+                      ? Text(
+                          ref.read(userProvider).errMsg.toString(),
                           style: TextStyle(color: Colors.red),
                         )
                       : const SizedBox(),

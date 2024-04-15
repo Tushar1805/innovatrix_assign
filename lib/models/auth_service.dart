@@ -1,8 +1,10 @@
+import 'package:innovatrix_assign/models/user_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   // Key for storing the session token
   static const String _sessionTokenKey = 'session_token';
+  UserDatabase userDatabase = UserDatabase();
 
   // Store the session token locally
   Future<void> setSessionToken(String token) async {
@@ -27,8 +29,12 @@ class AuthService {
   }
 
   // Check if the user is logged in
-  static Future<bool> isLoggedIn() async {
+  Future<bool> isLoggedIn() async {
     final sessionToken = await getSessionToken();
+
+    if (sessionToken != null) {
+      await userDatabase.getCurrentUser(sessionToken);
+    }
     return sessionToken != null;
   }
 

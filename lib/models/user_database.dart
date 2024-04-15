@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:innovatrix_assign/models/authService.dart';
+import 'package:innovatrix_assign/models/auth_service.dart';
 import 'package:innovatrix_assign/models/users.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,6 +33,7 @@ class UserDatabase extends ChangeNotifier {
   // Initialize
   static Future<void> initialize() async {
     final dir = await getApplicationDocumentsDirectory();
+    print("Path: ${dir.path.toString()}");
     isar = await Isar.open(
       [UsersSchema],
       directory: dir.path,
@@ -71,6 +72,18 @@ class UserDatabase extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Get Current User
+
+  Future<void> getCurrentUser(String id) async {
+    final data =
+        await isar.users.where().userIdEqualTo(int.parse(id)).findFirst();
+    print("User ID: $id");
+    if (data.toString() != "null") {
+      currentUser = data;
+    }
+    notifyListeners();
+  }
+
   // Login
   Future<bool> login(String username, String password) async {
     final data = await isar.users.where().emailEqualTo(username).findFirst();
@@ -89,7 +102,7 @@ class UserDatabase extends ChangeNotifier {
     } else {
       errMsg = "No user found with the provided email";
       notifyListeners();
-      return isLoginTrue;
+      return false;
     }
   }
 
@@ -124,6 +137,8 @@ class UserDatabase extends ChangeNotifier {
       exitingUser.phone = phone!;
 
       await isar.writeTxn(() => isar.users.put(exitingUser));
+      currentUser =
+          await isar.users.where().userIdEqualTo(id.toInt()).findFirst();
       await fetchUser();
       notifyListeners();
     }
