@@ -12,7 +12,7 @@ Riverpod is used for the state management and ISAR is used as the database. It a
 
 * Snapshot of the ISAR database inspector
   
-    <https://github.com/Tushar1805/innovatrix_assign/assets/78633485/b18e10ca-51e2-48e6-9eda-16a11ba7df7c>
+    <![ISAR_inspector](https://github.com/Tushar1805/recruit_me/assets/78633485/12874355-abd8-4929-a2b0-033603aeb217)>
 
 ## Getting Started
 
