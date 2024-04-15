@@ -1,26 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:innovatrix_assign/UI/homeScreen.dart';
 import 'package:innovatrix_assign/UI/login.dart';
+import 'package:innovatrix_assign/models/authService.dart';
 import 'package:innovatrix_assign/models/user_database.dart';
 
 void main() async {
   // Initialize users Isar database
   WidgetsFlutterBinding.ensureInitialized();
   await UserDatabase.initialize();
-  runApp(const ProviderScope(child: MyApp()));
+  final isLoggedIn = await AuthService.isLoggedIn();
+  runApp(
+    ProviderScope(
+      child: MyApp(isLoggedIn: isLoggedIn),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends ConsumerWidget {
+  final bool isLoggedIn;
+  const MyApp({Key? key, required this.isLoggedIn}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepPurple,
       ),
-      home: LoginScreen(),
+      home: isLoggedIn ? HomeScreen() : LoginScreen(),
     );
   }
 }

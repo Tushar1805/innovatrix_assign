@@ -102,21 +102,23 @@ class LoginScreen extends ConsumerWidget {
                     child: TextButton(
                         onPressed: () async {
                           if (formKey.currentState!.validate()) {
-                            if (await ref
-                                .watch(userProvider)
-                                .login(username.text, password.text)) {
+                            if (await ref.watch(userProvider).login(
+                                  username.text,
+                                  password.text,
+                                )) {
                               Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(
                                   builder: (context) => HomeScreen(),
                                 ),
                               );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(ref.read(userProvider).errMsg),
+                                ),
+                              );
                             }
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: Colors.red,
-                                content: Text(ref.read(userProvider).errMsg),
-                              ),
-                            );
                           }
                         },
                         child: const Text(

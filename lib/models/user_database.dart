@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:innovatrix_assign/models/authService.dart';
 import 'package:innovatrix_assign/models/users.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
@@ -77,13 +78,18 @@ class UserDatabase extends ChangeNotifier {
       isLoginTrue = verifyPassword(password, data!.password);
       if (isLoginTrue) {
         currentUser = data;
+        print("***********");
+        await AuthService().setSessionToken(data.userId.toString());
+        notifyListeners();
+      } else {
+        errMsg = "Incorrect Password";
+        notifyListeners();
       }
-      notifyListeners();
       return isLoginTrue;
     } else {
       errMsg = "No user found with the provided email";
       notifyListeners();
-      throw Exception(errMsg);
+      return isLoginTrue;
     }
   }
 

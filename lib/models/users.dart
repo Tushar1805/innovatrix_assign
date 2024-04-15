@@ -16,4 +16,3 @@ class Users {
   late String password;
 }
 
-class AuthService {}

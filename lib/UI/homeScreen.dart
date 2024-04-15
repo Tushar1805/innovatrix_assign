@@ -5,6 +5,17 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      drawer: Container(
+        color: Colors.grey.shade100,
+        child: Text("Logout"),
+      ),
+      appBar: AppBar(
+        title: Text("GraphQL Data"),
+      ),
+      body: Container(
+        child: Text("Hello"),
+      ),
+    );
   }
 }

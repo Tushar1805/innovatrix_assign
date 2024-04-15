@@ -158,25 +158,27 @@ class SignUp extends ConsumerWidget {
                           return "password is required";
                         } else if (password.text != confirmPassword.text) {
                           return "Passwords don't match";
+                        } else {
+                          return null;
                         }
-                        return null;
                       },
                       obscureText: !ref.watch(userProvider).isConfirmVisible,
                       decoration: InputDecoration(
-                          icon: const Icon(Icons.lock),
-                          border: InputBorder.none,
-                          hintText: "Password",
-                          suffixIcon: IconButton(
-                              onPressed: () {
-                                //In here we will create a click to show and hide the password a toggle button
-                                ref
-                                    .watch(userProvider)
-                                    .changeConfirmVisibility();
-                              },
-                              icon: Icon(
-                                  ref.watch(userProvider).isConfirmVisible
-                                      ? Icons.visibility
-                                      : Icons.visibility_off))),
+                        icon: const Icon(Icons.lock),
+                        border: InputBorder.none,
+                        hintText: "Confirm Password",
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            //In here we will create a click to show and hide the password a toggle button
+                            ref.watch(userProvider).changeConfirmVisibility();
+                          },
+                          icon: Icon(
+                            ref.watch(userProvider).isConfirmVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
 
@@ -193,23 +195,22 @@ class SignUp extends ConsumerWidget {
                           if (formKey.currentState!.validate()) {
                             //Login method will be here
                             await ref.read(userProvider).signUp(
-                                  name: "name",
+                                  name: name.text,
                                   email: username.text,
                                   password: password.text,
                                   phone: phone.text,
                                 );
-
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(ref.watch(userProvider).regMsg),
                               ),
                             );
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => LoginScreen(),
+                              ),
+                            );
                           }
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => LoginScreen(),
-                            ),
-                          );
                         },
                         child: const Text(
                           "SIGN UP",
